@@ -2,7 +2,6 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <!-- Adicionada configuração para o app aproveitar a tela toda sem problemas de zoom -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Devocional em Casal</title>
     
@@ -17,20 +16,15 @@
         body { 
             font-family: 'Inter', sans-serif; 
             -webkit-tap-highlight-color: transparent; 
-            overscroll-behavior-y: none; /* Evita que a página puxe para atualizar e desalinhe */
+            overscroll-behavior-y: none; 
         }
         .fonte-biblia { font-family: 'Merriweather', serif; }
         .escondido { display: none !important; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
-        
-        /* Ajuste fino para iPhones (Safe Area) */
-        .padding-safe-bottom {
-            padding-bottom: env(safe-area-inset-bottom, 12px);
-        }
+        .padding-safe-bottom { padding-bottom: env(safe-area-inset-bottom, 12px); }
     </style>
 </head>
-<!-- Aqui usamos h-[100dvh] que é a Altura Dinâmica perfeita para celulares -->
 <body class="bg-slate-50 text-slate-800 h-[100dvh] w-full flex flex-col overflow-hidden m-0 p-0">
 
     <!-- TELA DE LOGIN -->
@@ -65,7 +59,7 @@
     <!-- APP PRINCIPAL -->
     <div id="app-screen" class="escondido flex-col h-full w-full max-w-md mx-auto bg-slate-50 shadow-2xl relative overflow-hidden">
         
-        <!-- HEADER (TOPO) - Ajustado para tirar o excesso de espaço superior -->
+        <!-- HEADER -->
         <header class="py-4 px-6 flex justify-between items-center bg-slate-50 shrink-0 border-b border-slate-100 shadow-sm z-10">
             <div>
                 <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Bom dia,</p>
@@ -77,13 +71,10 @@
         </header>
 
         <!-- ÁREA ROLÁVEL PRINCIPAL -->
-        <!-- O 'flex-1' faz o centro empurrar o topo e a base para as pontas -->
         <main class="flex-1 overflow-y-auto px-6 py-4 w-full">
             
             <!-- ABA: DEVOCIONAL -->
             <div id="aba-devocional" class="block pb-4">
-                
-                <!-- Navegação de Datas -->
                 <div class="flex justify-between items-center bg-white p-2 rounded-2xl shadow-sm border border-slate-100 mb-5">
                     <button onclick="navegarData(-1)" class="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-teal-50 hover:text-teal-600 transition-colors">
                         <i class="ph ph-caret-left font-bold"></i>
@@ -94,7 +85,6 @@
                     </button>
                 </div>
 
-                <!-- Cartão do Devocional -->
                 <div class="bg-white p-5 rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 mb-5">
                     <div class="flex items-center gap-2 mb-4">
                         <i class="ph-fill ph-book-open-text text-teal-600 text-xl"></i>
@@ -105,7 +95,6 @@
                     </div>
                 </div>
 
-                <!-- Cartão de Anotações -->
                 <div class="bg-white p-5 rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 mb-2">
                     <h3 class="font-semibold text-slate-800 mb-3 flex items-center gap-2">
                         <i class="ph-fill ph-pencil-simple text-teal-600"></i> Reflexão
@@ -122,26 +111,57 @@
                 </div>
             </div>
 
-            <!-- ABA: HISTÓRICO -->
-            <div id="aba-historico" class="escondido pb-4">
-                <div class="flex items-center justify-between mb-5">
+            <!-- ABA: HISTÓRICO (CALENDÁRIO) -->
+            <div id="aba-historico" class="escondido pb-6">
+                <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                        <i class="ph-fill ph-calendar-check text-teal-600"></i> Nossa Jornada
+                        <i class="ph-fill ph-calendar-check text-teal-600"></i> Calendário
                     </h2>
-                    <button onclick="carregarHistorico()" class="text-teal-600 hover:bg-teal-50 p-2 rounded-full transition-colors" title="Atualizar Histórico">
+                    <button onclick="carregarHistorico()" class="text-teal-600 hover:bg-teal-50 p-2 rounded-full transition-colors" title="Atualizar">
                         <i class="ph-bold ph-arrows-clockwise text-xl"></i>
                     </button>
                 </div>
-                
-                <div id="lista-historico" class="space-y-4">
-                    <!-- Cards via JS -->
+
+                <!-- Card Principal do Calendário -->
+                <div class="bg-white p-4 rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100">
+                    <!-- Navegação de Meses -->
+                    <div class="flex justify-between items-center mb-4 px-2">
+                        <button onclick="mudarMes(-1)" class="h-8 w-8 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-teal-50 hover:text-teal-600">
+                            <i class="ph ph-caret-left font-bold"></i>
+                        </button>
+                        <span id="mes-ano-label" class="font-bold text-slate-700 text-base">...</span>
+                        <button onclick="mudarMes(1)" class="h-8 w-8 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-teal-50 hover:text-teal-600">
+                            <i class="ph ph-caret-right font-bold"></i>
+                        </button>
+                    </div>
+
+                    <!-- Dias da Semana -->
+                    <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-slate-400 mb-2">
+                        <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                    </div>
+
+                    <!-- Grid dos Dias do Mês -->
+                    <div id="calendario-grid" class="grid grid-cols-7 gap-1">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
+
+                <!-- Legenda de Ícones -->
+                <div class="flex justify-center items-center gap-6 mt-4 text-xs text-slate-500 font-medium bg-white py-3 px-4 rounded-2xl border border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <div id="legenda-avatar-1" class="w-6 h-6 rounded-full bg-teal-600 text-white flex items-center justify-center text-[10px] font-bold">U</div>
+                        <span id="legenda-nome-1">Você</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div id="legenda-avatar-2" class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">C</div>
+                        <span id="legenda-nome-2">Cônjuge</span>
+                    </div>
                 </div>
             </div>
 
         </main>
 
-        <!-- BOTTOM NAVIGATION (Fixa de verdade na base da tela) -->
-        <!-- O shrink-0 garante que ela não será esmagada, e o padding-safe-bottom lida com o detalhe do iPhone -->
+        <!-- BOTTOM NAVIGATION -->
         <nav class="shrink-0 bg-white border-t border-slate-200 shadow-[0_-5px_15px_rgb(0,0,0,0.03)] pt-2 padding-safe-bottom w-full">
             <div class="flex justify-around items-center">
                 <button onclick="mudarAba('aba-devocional')" id="nav-devocional" class="flex flex-col items-center p-2 w-20 text-teal-600 font-semibold transition-colors">
@@ -156,13 +176,45 @@
         </nav>
     </div>
 
-    <!-- LÓGICA JAVASCRIPT -->
+    <!-- MODAL DE DETALHES DO DIA -->
+    <div id="modal-dia" class="escondido fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-md max-h-[85vh] rounded-t-[2.5rem] sm:rounded-3xl p-6 shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom duration-200">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 shrink-0">
+                <div>
+                    <span id="modal-data" class="text-xs font-semibold text-teal-600 uppercase tracking-wider">Data</span>
+                    <h3 id="modal-referencia" class="text-lg font-bold text-slate-800">Referência</h3>
+                </div>
+                <button onclick="fecharModal()" class="h-8 w-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200">
+                    <i class="ph ph-x font-bold"></i>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 space-y-4 pr-1">
+                <!-- Texto Bíblico do Dia -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 uppercase mb-1">Leitura Bíblica</p>
+                    <div id="modal-texto-biblico" class="fonte-biblia text-slate-700 text-sm leading-relaxed whitespace-pre-line font-light"></div>
+                </div>
+
+                <!-- Comentários do Casal -->
+                <div>
+                    <p class="text-xs font-semibold text-slate-400 uppercase mb-2">Reflexões do Casal</p>
+                    <div id="modal-comentarios" class="space-y-3">
+                        <!-- Comentários inseridos via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
     <script>
-        // === ATENÇÃO: COLOQUE A URL DO SEU WEB APP AQUI ===
-        const API_URL = "https://script.google.com/macros/s/AKfycbyRRq99q9ldKX9XI5irg0LKaFShHEbY39unKOSw__yoHyUGWYaO05VJG7B82ICPiCs/exec"; 
+        const API_URL = "SUA_URL_DO_APPS_SCRIPT_AQUI"; // Lembre-se de colocar sua URL correta aqui!
         
         let offsetDias = 0;
         let dataAlvoAtual = "";
+        let cacheHistoricoData = { historico: [], devocionais: {} };
+        let dataCalendarioAtual = new Date();
 
         window.onload = () => {
             const user = localStorage.getItem("devocional_user");
@@ -220,7 +272,7 @@
         function mostrarApp() {
             document.getElementById('login-screen').classList.add('escondido');
             document.getElementById('app-screen').classList.remove('escondido');
-            document.getElementById('app-screen').classList.add('flex'); // Volta a aplicar o flex que o Tailwind usa
+            document.getElementById('app-screen').classList.add('flex');
             carregarDevocional();
         }
 
@@ -236,29 +288,24 @@
             const iconDev = document.getElementById('icon-devocional');
             const iconHist = document.getElementById('icon-historico');
 
-            navDev.classList.remove('text-teal-600', 'font-semibold');
-            navDev.classList.add('text-slate-400', 'font-medium');
-            iconDev.classList.replace('ph-fill', 'ph');
-
-            navHist.classList.remove('text-teal-600', 'font-semibold');
-            navHist.classList.add('text-slate-400', 'font-medium');
-            iconHist.classList.replace('ph-fill', 'ph');
+            navDev.className = "flex flex-col items-center p-2 w-20 text-slate-400 font-medium transition-colors";
+            iconDev.className = "ph ph-house text-2xl mb-1";
+            navHist.className = "flex flex-col items-center p-2 w-20 text-slate-400 font-medium transition-colors";
+            iconHist.className = "ph ph-calendar-check text-2xl mb-1";
             
             if(aba === 'aba-devocional') {
-                navDev.classList.add('text-teal-600', 'font-semibold');
-                navDev.classList.remove('text-slate-400', 'font-medium');
-                iconDev.classList.replace('ph', 'ph-fill');
+                navDev.className = "flex flex-col items-center p-2 w-20 text-teal-600 font-semibold transition-colors";
+                iconDev.className = "ph-fill ph-house text-2xl mb-1";
             } else {
-                navHist.classList.add('text-teal-600', 'font-semibold');
-                navHist.classList.remove('text-slate-400', 'font-medium');
-                iconHist.classList.replace('ph', 'ph-fill');
+                navHist.className = "flex flex-col items-center p-2 w-20 text-teal-600 font-semibold transition-colors";
+                iconHist.className = "ph-fill ph-calendar-check text-2xl mb-1";
                 carregarHistorico();
             }
         }
 
         async function carregarDevocional() {
             document.getElementById('ref-biblica').innerHTML = '<div class="h-4 bg-slate-200 rounded w-24 animate-pulse"></div>';
-            document.getElementById('texto-biblico').innerHTML = '<div class="space-y-2"><div class="h-4 bg-slate-200 rounded w-full animate-pulse"></div><div class="h-4 bg-slate-200 rounded w-5/6 animate-pulse"></div><div class="h-4 bg-slate-200 rounded w-4/6 animate-pulse"></div></div>';
+            document.getElementById('texto-biblico').innerHTML = '<div class="space-y-2"><div class="h-4 bg-slate-200 rounded w-full animate-pulse"></div><div class="h-4 bg-slate-200 rounded w-5/6 animate-pulse"></div></div>';
             document.getElementById('data-atual').innerText = "...";
             document.getElementById('anotacao-texto').value = '';
             document.getElementById('msg-salvo').classList.add('escondido');
@@ -314,58 +361,146 @@
         }
 
         async function carregarHistorico() {
-            const container = document.getElementById('lista-historico');
-            container.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-10 text-slate-400">
+            const grid = document.getElementById('calendario-grid');
+            grid.innerHTML = `
+                <div class="col-span-7 flex flex-col items-center justify-center py-12 text-slate-400">
                     <i class="ph ph-spinner animate-spin text-3xl mb-2"></i>
-                    <p class="text-sm">Buscando memórias...</p>
+                    <p class="text-xs">Carregando calendário...</p>
                 </div>`;
             
             const res = await apiCall({ action: 'getHistorico' });
             
             if(res.success) {
-                container.innerHTML = "";
-                if(res.historico.length === 0) {
-                    container.innerHTML = `
-                        <div class="text-center py-10 bg-white rounded-3xl border border-slate-100 shadow-sm">
-                            <i class="ph ph-notebook text-4xl text-slate-300 mb-2"></i>
-                            <p class="text-slate-500 font-medium text-sm">Nenhuma anotação ainda.</p>
-                        </div>`;
-                    return;
-                }
-                
-                res.historico.forEach(item => {
-                    let avisoAtraso = "";
-                    const dataAlvoCurta = item.dataAlvo; 
-                    const dataRealCurta = item.dataRealizacao.split(" ")[0]; 
+                cacheHistoricoData = res;
+                atualizarLegendaUsuarios(res.historico);
+                montarCalendario();
+            }
+        }
+
+        function atualizarLegendaUsuarios(historico) {
+            const currentUser = localStorage.getItem("devocional_user");
+            let outrosUsuarios = [...new Set(historico.map(h => h.usuario))].filter(u => u.toLowerCase() !== currentUser.toLowerCase());
+            let secondUser = outrosUsuarios.length > 0 ? outrosUsuarios[0] : "Cônjuge";
+
+            document.getElementById('legenda-nome-1').innerText = currentUser;
+            document.getElementById('legenda-avatar-1').innerText = currentUser.charAt(0).toUpperCase();
+            
+            document.getElementById('legenda-nome-2').innerText = secondUser;
+            document.getElementById('legenda-avatar-2').innerText = secondUser.charAt(0).toUpperCase();
+        }
+
+        function mudarMes(direcao) {
+            dataCalendarioAtual.setMonth(dataCalendarioAtual.getMonth() + direcao);
+            montarCalendario();
+        }
+
+        function montarCalendario() {
+            const grid = document.getElementById('calendario-grid');
+            grid.innerHTML = "";
+
+            const ano = dataCalendarioAtual.getFullYear();
+            const mes = dataCalendarioAtual.getMonth();
+
+            const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            document.getElementById('mes-ano-label').innerText = `${nomesMeses[mes]} de ${ano}`;
+
+            const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
+            const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
+            const currentUser = localStorage.getItem("devocional_user");
+
+            // Organizar histórico por data "dd/MM/yyyy"
+            let mapaHistorico = {};
+            cacheHistoricoData.historico.forEach(item => {
+                if(!mapaHistorico[item.dataAlvo]) mapaHistorico[item.dataAlvo] = [];
+                mapaHistorico[item.dataAlvo].push(item);
+            });
+
+            // Espaços vazios do início do mês
+            for(let i = 0; i < primeiroDiaSemana; i++) {
+                grid.innerHTML += `<div></div>`;
+            }
+
+            // Preencher dias do mês
+            for(let dia = 1; dia <= ultimoDiaMes; dia++) {
+                let diaStr = String(dia).padStart(2, '0');
+                let mesStr = String(mes + 1).padStart(2, '0');
+                let dataChave = `${diaStr}/${mesStr}/${ano}`;
+
+                let registrosDoDia = mapaHistorico[dataChave] || [];
+                let avataresHTML = "";
+                let usuariosNoDia = [...new Set(registrosDoDia.map(r => r.usuario))];
+
+                usuariosNoDia.forEach(user => {
+                    let isMe = user.toLowerCase() === currentUser.toLowerCase();
+                    let corBg = isMe ? "bg-teal-600 text-white" : "bg-indigo-600 text-white";
+                    let inicial = user.charAt(0).toUpperCase();
+                    avataresHTML += `<div class="w-5 h-5 rounded-full ${corBg} text-[10px] font-bold flex items-center justify-center shadow-sm" title="${user}">${inicial}</div>`;
+                });
+
+                let hoje = new Date();
+                let isHoje = dia === hoje.getDate() && mes === hoje.getMonth() && ano === hoje.getFullYear();
+                let estiloHoje = isHoje ? "border-teal-500 font-bold bg-teal-50/50" : "border-slate-100 hover:bg-slate-50";
+
+                grid.innerHTML += `
+                    <div onclick="abrirDetalhesDia('${dataChave}')" class="h-16 rounded-2xl border ${estiloHoje} bg-white p-1 flex flex-col justify-between items-center cursor-pointer transition-all shadow-[0_2px_8px_rgb(0,0,0,0.01)] relative">
+                        <span class="text-xs text-slate-700 ${isHoje ? 'text-teal-600 font-bold' : ''}">${dia}</span>
+                        <div class="flex gap-0.5 flex-wrap justify-center items-center mb-1">
+                            ${avataresHTML}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function abrirDetalhesDia(dataChave) {
+            document.getElementById('modal-data').innerText = dataChave;
+            
+            let devData = cacheHistoricoData.devocionais[dataChave];
+            if(devData) {
+                document.getElementById('modal-referencia').innerText = devData.referencia;
+                document.getElementById('modal-texto-biblico').innerText = devData.texto;
+            } else {
+                document.getElementById('modal-referencia').innerText = "Sem registro de leitura";
+                document.getElementById('modal-texto-biblico').innerText = "Nenhum texto bíblico catalogado para esta data.";
+            }
+
+            let containerComentarios = document.getElementById('modal-comentarios');
+            containerComentarios.innerHTML = "";
+
+            let registrosDia = cacheHistoricoData.historico.filter(h => h.dataAlvo === dataChave);
+
+            if(registrosDia.length === 0) {
+                containerComentarios.innerHTML = `
+                    <div class="text-center py-6 bg-slate-50 rounded-2xl border border-slate-100">
+                        <p class="text-xs text-slate-400">Nenhuma reflexão salva neste dia.</p>
+                    </div>`;
+            } else {
+                const currentUser = localStorage.getItem("devocional_user");
+                registrosDia.forEach(item => {
+                    let isMe = item.usuario.toLowerCase() === currentUser.toLowerCase();
+                    let corAvatar = isMe ? "bg-teal-100 text-teal-700" : "bg-indigo-100 text-indigo-700";
                     
-                    if(dataAlvoCurta !== dataRealCurta) {
-                        avisoAtraso = `<div class="mt-3 inline-flex items-center gap-1 bg-rose-50 text-rose-600 px-2.5 py-1 rounded-md text-[11px] font-semibold tracking-wide uppercase"><i class="ph-fill ph-clock-counter-clockwise"></i> Feito dia ${dataRealCurta}</div>`;
-                    }
-
-                    const isFirstUser = item.usuario.toLowerCase() === localStorage.getItem("devocional_user").toLowerCase();
-                    const avatarColor = isFirstUser ? "bg-teal-100 text-teal-700" : "bg-indigo-100 text-indigo-700";
-
-                    const card = `
-                        <div class="bg-white p-4 rounded-3xl shadow-[0_4px_15px_rgb(0,0,0,0.02)] border border-slate-100">
-                            <div class="flex justify-between items-start mb-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="h-9 w-9 rounded-full ${avatarColor} flex items-center justify-center font-bold text-sm uppercase">
-                                        ${item.usuario.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <p class="font-bold text-slate-800 text-sm">${item.usuario}</p>
-                                        <p class="text-[11px] text-slate-500 font-medium">${item.dataAlvo}</p>
-                                    </div>
+                    containerComentarios.innerHTML += `
+                        <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                            <div class="flex items-center gap-2 mb-2">
+                                <div class="w-6 h-6 rounded-full ${corAvatar} flex items-center justify-center font-bold text-xs uppercase">
+                                    ${item.usuario.charAt(0)}
                                 </div>
+                                <span class="font-bold text-xs text-slate-800">${item.usuario}</span>
                             </div>
-                            <p class="text-slate-600 text-sm leading-relaxed whitespace-pre-line mt-2">${item.anotacao}</p>
-                            ${avisoAtraso}
+                            <p class="text-xs text-slate-600 leading-relaxed whitespace-pre-line">${item.anotacao}</p>
                         </div>
                     `;
-                    container.innerHTML += card;
                 });
             }
+
+            document.getElementById('modal-dia').classList.remove('escondido');
+            document.getElementById('modal-dia').classList.add('flex');
+        }
+
+        function fecharModal() {
+            document.getElementById('modal-dia').classList.add('escondido');
+            document.getElementById('modal-dia').classList.remove('flex');
         }
 
         async function apiCall(payload) {
