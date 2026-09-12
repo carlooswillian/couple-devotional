@@ -3,200 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Devocional em Casal</title>
+    <title>Nosso Devocional</title>
+    <!-- Tailwind CSS para um design rápido e bonito -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --primary: #4a90e2; --bg: #f4f7f6; --text: #333; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h2, h3 { text-align: center; }
-        input, select, textarea, button { width: 100%; margin-bottom: 15px; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
-        button { background-color: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #357abd; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tabs button { background-color: #ddd; color: #333; }
-        .tabs button.active { background-color: var(--primary); color: white; }
         .hidden { display: none; }
-        .date-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: bold; }
-        .date-nav button { width: auto; padding: 8px 15px; margin: 0; }
-        .reference { font-weight: bold; color: var(--primary); }
-        .verse-text { line-height: 1.6; font-style: italic; white-space: pre-wrap; }
-        .history-item { border-bottom: 1px solid #eee; padding: 15px 0; }
-        .badge { font-size: 12px; padding: 4px 8px; border-radius: 12px; color: white; }
-        .badge.no-prazo { background-color: #2ecc71; }
-        .badge.atrasado { background-color: #e74c3c; }
-        #loader { text-align: center; font-style: italic; color: #888; display: none; }
     </style>
 </head>
-<body>
+<body class="bg-amber-50 text-gray-800 font-sans h-screen flex flex-col">
 
-<div class="container">
-    <!-- Tela de Login -->
-    <div id="login-section" class="card">
-        <h2>Entrar</h2>
-        <input type="text" id="user" placeholder="Nome (Ex: Carlos ou Thaís)">
-        <input type="password" id="password" placeholder="Senha">
-        <button onclick="login()">Entrar</button>
-        <p id="login-msg" style="color:red; text-align:center;"></p>
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen" class="flex flex-col items-center justify-center h-full">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-11/12 max-w-sm">
+            <h1 class="text-2xl font-bold text-amber-700 mb-6 text-center">Nosso Devocional</h1>
+            <input type="text" id="username" placeholder="Seu Nome" class="w-full mb-4 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-amber-500">
+            
+            <div class="relative w-full mb-6">
+                <input type="password" id="password" placeholder="Senha" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-amber-500">
+                <button type="button" onclick="togglePassword()" class="absolute right-3 top-2 text-gray-500 text-sm">Ver</button>
+            </div>
+
+            <button onclick="realizarLogin()" id="btn-login" class="w-full bg-amber-600 text-white py-2 rounded hover:bg-amber-700 transition">Entrar</button>
+            <p id="login-error" class="text-red-500 text-sm text-center mt-2 hidden"></p>
+        </div>
     </div>
 
-    <!-- App Principal -->
-    <div id="app-section" class="hidden">
-        <h2 id="welcome-msg"></h2>
+    <!-- APP PRINCIPAL -->
+    <div id="app-screen" class="hidden flex-col h-full">
         
-        <div class="tabs">
-            <button id="tab-devo" class="active" onclick="switchTab('devocional')">Devocional do Dia</button>
-            <button id="tab-hist" onclick="switchTab('historico')">Calendário / Histórico</button>
-        </div>
-
-        <div id="loader">Carregando...</div>
-
-        <!-- Aba Devocional -->
-        <div id="devocional-tab" class="card">
-            <div class="date-nav">
-                <button onclick="changeDate(-1)">← Anterior</button>
-                <span id="current-date-display"></span>
-                <button onclick="changeDate(1)">Próximo →</button>
+        <!-- HEADER -->
+        <header class="bg-amber-600 text-white p-4 flex justify-between items-center shadow-md">
+            <h1 class="text-xl font-bold">📖 Devocional</h1>
+            <div class="flex items-center gap-4">
+                <span id="user-display" class="font-medium"></span>
+                <button onclick="sair()" class="text-sm bg-amber-800 px-3 py-1 rounded hover:bg-amber-900">Sair</button>
             </div>
+        </header>
+
+        <!-- NAVEGAÇÃO DAS ABAS -->
+        <nav class="flex bg-amber-200">
+            <button onclick="mudarAba('aba-devocional')" id="nav-devocional" class="flex-1 py-3 text-center font-bold border-b-4 border-amber-600">Devocional do Dia</button>
+            <button onclick="mudarAba('aba-historico')" id="nav-historico" class="flex-1 py-3 text-center font-bold text-amber-700 border-b-4 border-transparent hover:bg-amber-300">Histórico</button>
+        </nav>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="flex-1 overflow-y-auto p-4 relative">
             
-            <p id="dev-error" style="color: red; text-align: center;"></p>
-            
-            <div id="dev-content">
-                <h3 id="dev-ref" class="reference"></h3>
-                <p id="dev-text" class="verse-text"></p>
-                <textarea id="dev-notes" rows="5" placeholder="O que Deus falou com você hoje?"></textarea>
-                <button onclick="saveNote()">Salvar Anotação</button>
-            </div>
-        </div>
+            <!-- ABA DEVOCIONAL -->
+            <div id="aba-devocional" class="block pb-20">
+                <div class="flex justify-between items-center mb-4">
+                    <button onclick="navegarData(-1)" class="bg-gray-200 px-3 py-1 rounded">⬅ Anterior</button>
+                    <span id="data-atual" class="font-bold text-amber-700">Carregando...</span>
+                    <button onclick="navegarData(1)" id="btn-proximo" class="bg-gray-200 px-3 py-1 rounded">Próximo ➡</button>
+                </div>
 
-        <!-- Aba Histórico -->
-        <div id="historico-tab" class="card hidden">
-            <h3>Seu Histórico</h3>
-            <div id="history-list"></div>
-        </div>
-    </div>
-</div>
-
-<script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwlyhSKjayqky5Hi8fTL2-64-OHLi43ip4NhD5-wPQDdpF3hek7i6g1IWShATOwUoo/exec'; 
-    let currentUser = '';
-    let currentDate = new Date();
-
-    async function apiCall(data) {
-        document.getElementById('loader').style.display = 'block';
-        try {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify(data)
-            });
-            return await response.json();
-        } catch (e) {
-            alert('Erro de conexão.');
-        } finally {
-            document.getElementById('loader').style.display = 'none';
-        }
-    }
-
-    async function login() {
-        const user = document.getElementById('user').value.trim();
-        const pass = document.getElementById('password').value.trim();
-        const res = await apiCall({ action: 'login', usuario: user, senha: pass });
-        
-        if (res && res.status === 'success') {
-            currentUser = res.usuario;
-            document.getElementById('login-section').classList.add('hidden');
-            document.getElementById('app-section').classList.remove('hidden');
-            document.getElementById('welcome-msg').innerText = 'Olá, ' + currentUser;
-            loadDevocional();
-        } else {
-            document.getElementById('login-msg').innerText = 'Credenciais incorretas.';
-        }
-    }
-
-    function formatDate(date) {
-        return date.toLocaleDateString('pt-BR');
-    }
-
-    function changeDate(days) {
-        currentDate.setDate(currentDate.getDate() + days);
-        loadDevocional();
-    }
-
-    async function loadDevocional() {
-        const dateStr = formatDate(currentDate);
-        document.getElementById('current-date-display').innerText = dateStr;
-        
-        const res = await apiCall({ action: 'getDevocional', data: dateStr, usuario: currentUser });
-        
-        if (res && res.status === 'success') {
-            document.getElementById('dev-content').classList.remove('hidden');
-            document.getElementById('dev-error').innerText = '';
-            document.getElementById('dev-ref').innerText = res.devocional.referencia;
-            document.getElementById('dev-text').innerText = res.devocional.texto;
-            document.getElementById('dev-notes').value = res.anotacao || '';
-        } else {
-            document.getElementById('dev-content').classList.add('hidden');
-            document.getElementById('dev-error').innerText = 'Nenhum devocional programado para esta data.';
-        }
-    }
-
-    async function saveNote() {
-        const note = document.getElementById('dev-notes').value;
-        const dateStr = formatDate(currentDate);
-        
-        const res = await apiCall({ 
-            action: 'salvarAnotacao', 
-            usuario: currentUser, 
-            dataPrevista: dateStr, 
-            anotacao: note 
-        });
-        
-        if (res && res.status === 'success') {
-            alert('Anotação salva com sucesso!');
-        }
-    }
-
-    async function loadHistorico() {
-        const res = await apiCall({ action: 'getHistorico', usuario: currentUser });
-        const list = document.getElementById('history-list');
-        list.innerHTML = '';
-        
-        if (res && res.status === 'success' && res.historico.length > 0) {
-            res.historico.forEach(item => {
-                let badgeClass = item.status === 'No prazo' ? 'no-prazo' : 'atrasado';
-                let obsText = item.status === 'Atrasado' ? `<br><small><i>Concluído em: ${item.dataRealizada}</i></small>` : '';
-                
-                list.innerHTML += `
-                    <div class="history-item">
-                        <strong>Data do Plano: ${item.dataPrevista}</strong> 
-                        <span class="badge ${badgeClass}">${item.status}</span>
-                        ${obsText}
-                        <p>${item.anotacao}</p>
+                <div class="bg-white p-5 rounded-lg shadow-md mb-6">
+                    <h2 id="ref-biblica" class="text-xl font-bold text-amber-800 mb-3">...</h2>
+                    <div id="texto-biblico" class="text-gray-700 leading-relaxed whitespace-pre-line text-lg italic">
+                        Buscando devocional...
                     </div>
-                `;
-            });
-        } else {
-            list.innerHTML = '<p>Nenhum histórico encontrado.</p>';
-        }
-    }
+                </div>
 
-    function switchTab(tab) {
-        document.getElementById('tab-devo').classList.remove('active');
-        document.getElementById('tab-hist').classList.remove('active');
-        document.getElementById('devocional-tab').classList.add('hidden');
-        document.getElementById('historico-tab').classList.add('hidden');
+                <div class="bg-white p-5 rounded-lg shadow-md">
+                    <h3 class="font-bold text-gray-700 mb-2">Suas Anotações e Oração:</h3>
+                    <textarea id="anotacao-texto" rows="4" class="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="O que Deus falou com você hoje?"></textarea>
+                    <button onclick="salvarAnotacao()" class="w-full mt-3 bg-green-600 text-white py-2 rounded font-bold hover:bg-green-700">Salvar e Concluir ✔</button>
+                    <p id="msg-salvo" class="text-green-600 text-sm text-center mt-2 hidden">Salvo com sucesso no Histórico!</p>
+                </div>
+            </div>
 
-        if (tab === 'devocional') {
-            document.getElementById('tab-devo').classList.add('active');
-            document.getElementById('devocional-tab').classList.remove('hidden');
-            loadDevocional();
-        } else {
-            document.getElementById('tab-hist').classList.add('active');
-            document.getElementById('historico-tab').classList.remove('hidden');
-            loadHistorico();
+            <!-- ABA HISTÓRICO / CALENDÁRIO -->
+            <div id="aba-historico" class="hidden">
+                <h2 class="text-2xl font-bold text-amber-800 mb-4">Histórico Realizado</h2>
+                <button onclick="carregarHistorico()" class="mb-4 bg-amber-100 text-amber-800 px-4 py-2 rounded text-sm w-full font-bold">🔄 Atualizar Histórico</button>
+                <div id="lista-historico" class="space-y-4">
+                    <!-- Cards do histórico entram aqui via JS -->
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- LÓGICA JAVASCRIPT -->
+    <script>
+        // === ATENÇÃO: COLOQUE A URL DO SEU WEB APP AQUI ===
+        const API_URL = "https://script.google.com/macros/s/AKfycbyRRq99q9ldKX9XI5irg0LKaFShHEbY39unKOSw__yoHyUGWYaO05VJG7B82ICPiCs/exec"; 
+        
+        let offsetDias = 0; // 0 = hoje, -1 = ontem
+        let dataAlvoAtual = "";
+
+        // Verifica se já está logado ao carregar a página
+        window.onload = () => {
+            const user = localStorage.getItem("devocional_user");
+            if(user) {
+                document.getElementById('user-display').innerText = user;
+                mostrarApp();
+            }
+        };
+
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const btn = input.nextElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerText = 'Ocultar';
+            } else {
+                input.type = 'password';
+                btn.innerText = 'Ver';
+            }
         }
-    }
-</script>
+
+        async function realizarLogin() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const btn = document.getElementById('btn-login');
+            const errorMsg = document.getElementById('login-error');
+            
+            btn.innerText = "Carregando...";
+            errorMsg.classList.add('hidden');
+
+            const res = await apiCall({ action: 'login', usuario: user, senha: pass });
+            
+            if(res.success) {
+                localStorage.setItem("devocional_user", res.usuario);
+                document.getElementById('user-display').innerText = res.usuario;
+                mostrarApp();
+            } else {
+                errorMsg.innerText = res.message;
+                errorMsg.classList.remove('hidden');
+            }
+            btn.innerText = "Entrar";
+        }
+
+        function sair() {
+            localStorage.removeItem("devocional_user");
+            document.getElementById('app-screen').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        function mostrarApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            document.getElementById('app-screen').classList.add('flex');
+            carregarDevocional();
+        }
+
+        function mudarAba(aba) {
+            document.getElementById('aba-devocional').classList.add('hidden');
+            document.getElementById('aba-historico').classList.add('hidden');
+            document.getElementById(aba).classList.remove('hidden');
+            document.getElementById(aba).classList.add('block');
+
+            // Visual das abas
+            document.getElementById('nav-devocional').classList.remove('border-amber-600', 'text-amber-700');
+            document.getElementById('nav-historico').classList.remove('border-amber-600', 'text-amber-700');
+            
+            if(aba === 'aba-devocional') {
+                document.getElementById('nav-devocional').classList.add('border-amber-600');
+            } else {
+                document.getElementById('nav-historico').classList.add('border-amber-600');
+                carregarHistorico();
+            }
+        }
+
+        async function carregarDevocional() {
+            document.getElementById('ref-biblica').innerText = "Carregando...";
+            document.getElementById('texto-biblico').innerText = "Por favor, aguarde o Gemini preparar ou buscar o devocional...";
+            document.getElementById('data-atual').innerText = "...";
+            document.getElementById('anotacao-texto').value = '';
+            document.getElementById('msg-salvo').classList.add('hidden');
+
+            // Esconde botão próximo se estivermos no hoje
+            document.getElementById('btn-proximo').style.visibility = offsetDias >= 0 ? 'hidden' : 'visible';
+
+            const res = await apiCall({ action: 'getDevocional', dataOffset: offsetDias });
+            
+            if(res.success) {
+                dataAlvoAtual = res.data;
+                document.getElementById('data-atual').innerText = res.data;
+                document.getElementById('ref-biblica').innerText = res.referencia;
+                document.getElementById('texto-biblico').innerText = res.texto;
+            } else {
+                document.getElementById('data-atual').innerText = "Data não gerada";
+                document.getElementById('ref-biblica').innerText = "Ops!";
+                document.getElementById('texto-biblico').innerText = "Não há devocional gerado para esta data passada. Volte para o dia atual.";
+            }
+        }
+
+        function navegarData(direcao) {
+            offsetDias += direcao;
+            if(offsetDias > 0) offsetDias = 0; // Não deixa ir pro futuro
+            carregarDevocional();
+        }
+
+        async function salvarAnotacao() {
+            const user = localStorage.getItem("devocional_user");
+            const texto = document.getElementById('anotacao-texto').value;
+            
+            if(!texto) return alert("Escreva algo antes de salvar!");
+
+            const res = await apiCall({ action: 'salvarAnotacao', dataAlvo: dataAlvoAtual, usuario: user, anotacao: texto });
+            if(res.success) {
+                document.getElementById('msg-salvo').classList.remove('hidden');
+                setTimeout(() => document.getElementById('msg-salvo').classList.add('hidden'), 3000);
+            }
+        }
+
+        async function carregarHistorico() {
+            const container = document.getElementById('lista-historico');
+            container.innerHTML = "<p class='text-center text-gray-500'>Carregando histórico...</p>";
+            
+            const res = await apiCall({ action: 'getHistorico' });
+            if(res.success) {
+                container.innerHTML = "";
+                if(res.historico.length === 0) {
+                    container.innerHTML = "<p class='text-center'>Nenhuma anotação ainda.</p>";
+                    return;
+                }
+                
+                res.historico.forEach(item => {
+                    // Verifica se foi feito atrasado (a data do devocional é diferente da data de realização)
+                    let avisoAtraso = "";
+                    const dataAlvoCurta = item.dataAlvo; // ex 12/09/2026
+                    const dataRealCurta = item.dataRealizacao.split(" ")[0]; // Pega so a data
+                    if(dataAlvoCurta !== dataRealCurta) {
+                        avisoAtraso = `<span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded ml-2">Feito em: ${item.dataRealizacao}</span>`;
+                    }
+
+                    const card = `
+                        <div class="bg-white p-4 rounded-lg shadow border-l-4 border-amber-500">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-amber-700">📅 Ref: ${item.dataAlvo}</span>
+                                <span class="text-sm text-gray-500 font-bold">👤 ${item.usuario}</span>
+                            </div>
+                            <p class="text-gray-700 italic">"${item.anotacao}"</p>
+                            <div class="mt-2 text-right">
+                                ${avisoAtraso}
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            }
+        }
+
+        // Função utilitária para chamar a API do Google
+        async function apiCall(payload) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    redirect: 'follow'
+                });
+                return await response.json();
+            } catch (error) {
+                console.error("Erro na API:", error);
+                return { success: false, message: "Erro de conexão" };
+            }
+        }
+    </script>
 </body>
 </html>
