@@ -16,7 +16,6 @@
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         .fonte-biblia { font-family: 'Merriweather', serif; }
         .escondido { display: none !important; }
-        /* Suaviza a barra de rolagem */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
     </style>
@@ -53,10 +52,10 @@
     </div>
 
     <!-- APP PRINCIPAL -->
-    <div id="app-screen" class="escondido flex-col h-full w-full max-w-md mx-auto bg-slate-50 relative shadow-2xl">
+    <div id="app-screen" class="escondido flex-col h-full w-full max-w-md mx-auto bg-slate-50 shadow-2xl">
         
         <!-- HEADER (TOPO) -->
-        <header class="pt-12 pb-4 px-6 flex justify-between items-center bg-slate-50 z-10">
+        <header class="pt-8 pb-4 px-6 flex justify-between items-center bg-slate-50 shrink-0">
             <div>
                 <p class="text-sm text-slate-500 font-medium">Bom dia,</p>
                 <h1 id="user-display" class="text-2xl font-bold text-slate-800">Nome</h1>
@@ -67,10 +66,10 @@
         </header>
 
         <!-- ÁREA ROLÁVEL PRINCIPAL -->
-        <main class="flex-1 overflow-y-auto px-6 pb-28 pt-2">
+        <main class="flex-1 overflow-y-auto px-6 py-2">
             
             <!-- ABA: DEVOCIONAL -->
-            <div id="aba-devocional" class="block animate-fade-in">
+            <div id="aba-devocional" class="block pb-6">
                 
                 <!-- Navegação de Datas -->
                 <div class="flex justify-between items-center bg-white p-2 rounded-2xl shadow-sm border border-slate-100 mb-6">
@@ -101,7 +100,7 @@
                     </h3>
                     <textarea id="anotacao-texto" rows="4" class="w-full bg-slate-50 rounded-2xl p-4 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-colors resize-none text-slate-700 placeholder-slate-400" placeholder="O que Deus falou com você através deste texto?"></textarea>
                     
-                    <button onclick="salvarAnotacao()" class="w-full mt-4 bg-slate-800 text-white font-medium py-3 rounded-2xl shadow-md hover:bg-slate-700 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <button onclick="salvarAnotacao(event)" class="w-full mt-4 bg-slate-800 text-white font-medium py-3 rounded-2xl shadow-md hover:bg-slate-700 active:scale-95 transition-all flex items-center justify-center gap-2">
                         <i class="ph-bold ph-check"></i> Salvar Reflexão
                     </button>
                     
@@ -112,10 +111,12 @@
             </div>
 
             <!-- ABA: HISTÓRICO -->
-            <div id="aba-historico" class="escondido animate-fade-in">
+            <div id="aba-historico" class="escondido pb-6">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold text-slate-800">Nossa Jornada</h2>
-                    <button onclick="carregarHistorico()" class="text-teal-600 hover:bg-teal-50 p-2 rounded-full transition-colors">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="ph-fill ph-calendar-check text-teal-600"></i> Nossa Jornada
+                    </h2>
+                    <button onclick="carregarHistorico()" class="text-teal-600 hover:bg-teal-50 p-2 rounded-full transition-colors" title="Atualizar Histórico">
                         <i class="ph-bold ph-arrows-clockwise text-xl"></i>
                     </button>
                 </div>
@@ -127,16 +128,16 @@
 
         </main>
 
-        <!-- BOTTOM NAVIGATION (Navegação Inferior) -->
-        <nav class="absolute bottom-0 w-full bg-white/80 backdrop-blur-md border-t border-slate-100 pb-safe shadow-[0_-10px_40px_rgb(0,0,0,0.03)] z-50">
-            <div class="flex justify-around items-center p-2">
-                <button onclick="mudarAba('aba-devocional')" id="nav-devocional" class="flex flex-col items-center p-2 w-20 text-teal-600 transition-colors">
+        <!-- BOTTOM NAVIGATION (Fixa e sempre visível) -->
+        <nav class="shrink-0 bg-white border-t border-slate-100 shadow-[0_-10px_40px_rgb(0,0,0,0.03)] pb-4 pt-2 px-6">
+            <div class="flex justify-around items-center">
+                <button onclick="mudarAba('aba-devocional')" id="nav-devocional" class="flex flex-col items-center p-2 w-20 text-teal-600 font-semibold transition-colors">
                     <i id="icon-devocional" class="ph-fill ph-house text-2xl mb-1"></i>
-                    <span class="text-[10px] font-semibold">Hoje</span>
+                    <span class="text-[11px]">Hoje</span>
                 </button>
-                <button onclick="mudarAba('aba-historico')" id="nav-historico" class="flex flex-col items-center p-2 w-20 text-slate-400 hover:text-teal-600 transition-colors">
+                <button onclick="mudarAba('aba-historico')" id="nav-historico" class="flex flex-col items-center p-2 w-20 text-slate-400 font-medium hover:text-teal-600 transition-colors">
                     <i id="icon-historico" class="ph ph-calendar-check text-2xl mb-1"></i>
-                    <span class="text-[10px] font-medium">Histórico</span>
+                    <span class="text-[11px]">Histórico</span>
                 </button>
             </div>
         </nav>
@@ -200,7 +201,7 @@
             document.getElementById('login-screen').classList.remove('escondido');
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
-            offsetDias = 0; // Reseta a data
+            offsetDias = 0;
         }
 
         function mostrarApp() {
@@ -211,13 +212,15 @@
         }
 
         function mudarAba(aba) {
+            // Esconde todas
             document.getElementById('aba-devocional').classList.add('escondido');
             document.getElementById('aba-historico').classList.add('escondido');
             
+            // Mostra a selecionada
             document.getElementById(aba).classList.remove('escondido');
             document.getElementById(aba).classList.add('block');
 
-            // Atualiza os estilos da Bottom Nav
+            // Atualiza os estilos da Nav Inferior
             const navDev = document.getElementById('nav-devocional');
             const navHist = document.getElementById('nav-historico');
             const iconDev = document.getElementById('icon-devocional');
@@ -273,7 +276,7 @@
             carregarDevocional();
         }
 
-        async function salvarAnotacao() {
+        async function salvarAnotacao(event) {
             const user = localStorage.getItem("devocional_user");
             const texto = document.getElementById('anotacao-texto').value;
             
@@ -285,15 +288,17 @@
             const btn = event.currentTarget;
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Salvando...';
+            btn.disabled = true;
 
             const res = await apiCall({ action: 'salvarAnotacao', dataAlvo: dataAlvoAtual, usuario: user, anotacao: texto });
             
             btn.innerHTML = originalText;
+            btn.disabled = false;
             
             if(res.success) {
                 const msg = document.getElementById('msg-salvo');
                 msg.classList.remove('escondido');
-                document.getElementById('anotacao-texto').value = ''; // Limpa após salvar
+                document.getElementById('anotacao-texto').value = '';
                 setTimeout(() => msg.classList.add('escondido'), 4000);
             }
         }
@@ -312,7 +317,7 @@
                 container.innerHTML = "";
                 if(res.historico.length === 0) {
                     container.innerHTML = `
-                        <div class="text-center py-10 bg-white rounded-3xl border border-slate-100">
+                        <div class="text-center py-10 bg-white rounded-3xl border border-slate-100 shadow-sm">
                             <i class="ph ph-notebook text-4xl text-slate-300 mb-2"></i>
                             <p class="text-slate-500 font-medium">Nenhuma anotação ainda.</p>
                         </div>`;
@@ -328,7 +333,6 @@
                         avisoAtraso = `<div class="mt-3 inline-flex items-center gap-1 bg-rose-50 text-rose-600 px-2.5 py-1 rounded-md text-xs font-medium"><i class="ph-fill ph-clock-counter-clockwise"></i> Feito dia ${dataRealCurta}</div>`;
                     }
 
-                    // Determina uma cor baseada no usuário (opcional, só para visual)
                     const isFirstUser = item.usuario.toLowerCase() === localStorage.getItem("devocional_user").toLowerCase();
                     const avatarColor = isFirstUser ? "bg-teal-100 text-teal-700" : "bg-indigo-100 text-indigo-700";
 
@@ -370,7 +374,6 @@
         }
     </script>
     
-    <!-- Evitar pull-to-refresh no mobile (comportamento de app) -->
     <style>
         body { overscroll-behavior-y: contain; }
     </style>
