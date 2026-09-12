@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devocional em Casal</title>
+    <style>
+        :root { --primary: #4a90e2; --bg: #f4f7f6; --text: #333; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h2, h3 { text-align: center; }
+        input, select, textarea, button { width: 100%; margin-bottom: 15px; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
+        button { background-color: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #357abd; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tabs button { background-color: #ddd; color: #333; }
+        .tabs button.active { background-color: var(--primary); color: white; }
+        .hidden { display: none; }
+        .date-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: bold; }
+        .date-nav button { width: auto; padding: 8px 15px; margin: 0; }
+        .reference { font-weight: bold; color: var(--primary); }
+        .verse-text { line-height: 1.6; font-style: italic; white-space: pre-wrap; }
+        .history-item { border-bottom: 1px solid #eee; padding: 15px 0; }
+        .badge { font-size: 12px; padding: 4px 8px; border-radius: 12px; color: white; }
+        .badge.no-prazo { background-color: #2ecc71; }
+        .badge.atrasado { background-color: #e74c3c; }
+        #loader { text-align: center; font-style: italic; color: #888; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Tela de Login -->
+    <div id="login-section" class="card">
+        <h2>Entrar</h2>
+        <input type="text" id="user" placeholder="Nome (Ex: Carlos ou Thaís)">
+        <input type="password" id="password" placeholder="Senha">
+        <button onclick="login()">Entrar</button>
+        <p id="login-msg" style="color:red; text-align:center;"></p>
+    </div>
+
+    <!-- App Principal -->
+    <div id="app-section" class="hidden">
+        <h2 id="welcome-msg"></h2>
+        
+        <div class="tabs">
+            <button id="tab-devo" class="active" onclick="switchTab('devocional')">Devocional do Dia</button>
+            <button id="tab-hist" onclick="switchTab('historico')">Calendário / Histórico</button>
+        </div>
+
+        <div id="loader">Carregando...</div>
+
+        <!-- Aba Devocional -->
+        <div id="devocional-tab" class="card">
+            <div class="date-nav">
+                <button onclick="changeDate(-1)">← Anterior</button>
+                <span id="current-date-display"></span>
+                <button onclick="changeDate(1)">Próximo →</button>
+            </div>
+            
+            <p id="dev-error" style="color: red; text-align: center;"></p>
+            
+            <div id="dev-content">
+                <h3 id="dev-ref" class="reference"></h3>
+                <p id="dev-text" class="verse-text"></p>
+                <textarea id="dev-notes" rows="5" placeholder="O que Deus falou com você hoje?"></textarea>
+                <button onclick="saveNote()">Salvar Anotação</button>
+            </div>
+        </div>
+
+        <!-- Aba Histórico -->
+        <div id="historico-tab" class="card hidden">
+            <h3>Seu Histórico</h3>
+            <div id="history-list"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwlyhSKjayqky5Hi8fTL2-64-OHLi43ip4NhD5-wPQDdpF3hek7i6g1IWShATOwUoo/exec'; 
+    let currentUser = '';
+    let currentDate = new Date();
+
+    async function apiCall(data) {
+        document.getElementById('loader').style.display = 'block';
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        } catch (e) {
+            alert('Erro de conexão.');
+        } finally {
+            document.getElementById('loader').style.display = 'none';
+        }
+    }
+
+    async function login() {
+        const user = document.getElementById('user').value.trim();
+        const pass = document.getElementById('password').value.trim();
+        const res = await apiCall({ action: 'login', usuario: user, senha: pass });
+        
+        if (res && res.status === 'success') {
+            currentUser = res.usuario;
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('app-section').classList.remove('hidden');
+            document.getElementById('welcome-msg').innerText = 'Olá, ' + currentUser;
+            loadDevocional();
+        } else {
+            document.getElementById('login-msg').innerText = 'Credenciais incorretas.';
+        }
+    }
+
+    function formatDate(date) {
+        return date.toLocaleDateString('pt-BR');
+    }
+
+    function changeDate(days) {
+        currentDate.setDate(currentDate.getDate() + days);
+        loadDevocional();
+    }
+
+    async function loadDevocional() {
+        const dateStr = formatDate(currentDate);
+        document.getElementById('current-date-display').innerText = dateStr;
+        
+        const res = await apiCall({ action: 'getDevocional', data: dateStr, usuario: currentUser });
+        
+        if (res && res.status === 'success') {
+            document.getElementById('dev-content').classList.remove('hidden');
+            document.getElementById('dev-error').innerText = '';
+            document.getElementById('dev-ref').innerText = res.devocional.referencia;
+            document.getElementById('dev-text').innerText = res.devocional.texto;
+            document.getElementById('dev-notes').value = res.anotacao || '';
+        } else {
+            document.getElementById('dev-content').classList.add('hidden');
+            document.getElementById('dev-error').innerText = 'Nenhum devocional programado para esta data.';
+        }
+    }
+
+    async function saveNote() {
+        const note = document.getElementById('dev-notes').value;
+        const dateStr = formatDate(currentDate);
+        
+        const res = await apiCall({ 
+            action: 'salvarAnotacao', 
+            usuario: currentUser, 
+            dataPrevista: dateStr, 
+            anotacao: note 
+        });
+        
+        if (res && res.status === 'success') {
+            alert('Anotação salva com sucesso!');
+        }
+    }
+
+    async function loadHistorico() {
+        const res = await apiCall({ action: 'getHistorico', usuario: currentUser });
+        const list = document.getElementById('history-list');
+        list.innerHTML = '';
+        
+        if (res && res.status === 'success' && res.historico.length > 0) {
+            res.historico.forEach(item => {
+                let badgeClass = item.status === 'No prazo' ? 'no-prazo' : 'atrasado';
+                let obsText = item.status === 'Atrasado' ? `<br><small><i>Concluído em: ${item.dataRealizada}</i></small>` : '';
+                
+                list.innerHTML += `
+                    <div class="history-item">
+                        <strong>Data do Plano: ${item.dataPrevista}</strong> 
+                        <span class="badge ${badgeClass}">${item.status}</span>
+                        ${obsText}
+                        <p>${item.anotacao}</p>
+                    </div>
+                `;
+            });
+        } else {
+            list.innerHTML = '<p>Nenhum histórico encontrado.</p>';
+        }
+    }
+
+    function switchTab(tab) {
+        document.getElementById('tab-devo').classList.remove('active');
+        document.getElementById('tab-hist').classList.remove('active');
+        document.getElementById('devocional-tab').classList.add('hidden');
+        document.getElementById('historico-tab').classList.add('hidden');
+
+        if (tab === 'devocional') {
+            document.getElementById('tab-devo').classList.add('active');
+            document.getElementById('devocional-tab').classList.remove('hidden');
+            loadDevocional();
+        } else {
+            document.getElementById('tab-hist').classList.add('active');
+            document.getElementById('historico-tab').classList.remove('hidden');
+            loadHistorico();
+        }
+    }
+</script>
+</body>
+</html>
