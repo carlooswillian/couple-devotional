@@ -153,8 +153,8 @@
                         <span id="legenda-nome-1">Você</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <div id="legenda-avatar-2" class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">C</div>
-                        <span id="legenda-nome-2">Cônjuge</span>
+                        <div id="legenda-avatar-2" class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">T</div>
+                        <span id="legenda-nome-2">Thaís</span>
                     </div>
                 </div>
             </div>
@@ -209,7 +209,7 @@
 
     <!-- JAVASCRIPT -->
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbyRRq99q9ldKX9XI5irg0LKaFShHEbY39unKOSw__yoHyUGWYaO05VJG7B82ICPiCs/exec"; // Lembre-se de colocar sua URL correta aqui!
+        const API_URL = "SUA_URL_DO_APP_SCRIPT_AQUI"; // Lembre-se de colocar sua URL correta aqui!
         
         let offsetDias = 0;
         let dataAlvoAtual = "";
@@ -380,7 +380,8 @@
         function atualizarLegendaUsuarios(historico) {
             const currentUser = localStorage.getItem("devocional_user");
             let outrosUsuarios = [...new Set(historico.map(h => h.usuario))].filter(u => u.toLowerCase() !== currentUser.toLowerCase());
-            let secondUser = outrosUsuarios.length > 0 ? outrosUsuarios[0] : "Cônjuge";
+            // Aqui alteramos o nome dinâmico para Thaís quando não encontra no histórico
+            let secondUser = outrosUsuarios.length > 0 ? outrosUsuarios[0] : "Thaís";
 
             document.getElementById('legenda-nome-1').innerText = currentUser;
             document.getElementById('legenda-avatar-1').innerText = currentUser.charAt(0).toUpperCase();
