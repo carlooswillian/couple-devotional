@@ -101,7 +101,7 @@
                     </h3>
                     <textarea id="anotacao-texto" rows="3" class="w-full bg-slate-50 rounded-2xl p-4 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-colors resize-none text-slate-700 placeholder-slate-400 text-sm" placeholder="O que Deus falou com você hoje?"></textarea>
                     
-                    <button onclick="salvarAnotacao(event)" class="w-full mt-3 bg-slate-800 text-white font-medium py-3 rounded-2xl shadow hover:bg-slate-700 active:scale-95 transition-all flex items-center justify-center gap-2 text-sm">
+                    <button id="btn-salvar-anotacao" onclick="salvarAnotacao(event)" class="w-full mt-3 bg-slate-800 text-white font-medium py-3 rounded-2xl shadow hover:bg-slate-700 active:scale-95 transition-all flex items-center justify-center gap-2 text-sm">
                         <i class="ph-bold ph-check"></i> Salvar Reflexão
                     </button>
                     
@@ -209,7 +209,7 @@
 
     <!-- JAVASCRIPT -->
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbyRRq99q9ldKX9XI5irg0LKaFShHEbY39unKOSw__yoHyUGWYaO05VJG7B82ICPiCs/exec"; // Lembre-se de colocar sua URL correta aqui!
+        const API_URL = "https://script.google.com/macros/s/AKfycbyRRq99q9ldKX9XI5irg0LKaFShHEbY39unKOSw__yoHyUGWYaO05VJG7B82ICPiCs/exec"; // Substitua com a URL correta caso precise publicar uma nova versão
         
         let offsetDias = 0;
         let dataAlvoAtual = "";
@@ -304,22 +304,35 @@
         }
 
         async function carregarDevocional() {
+            const user = localStorage.getItem("devocional_user"); 
+            
             document.getElementById('ref-biblica').innerHTML = '<div class="h-4 bg-slate-200 rounded w-24 animate-pulse"></div>';
             document.getElementById('texto-biblico').innerHTML = '<div class="space-y-2"><div class="h-4 bg-slate-200 rounded w-full animate-pulse"></div><div class="h-4 bg-slate-200 rounded w-5/6 animate-pulse"></div></div>';
             document.getElementById('data-atual').innerText = "...";
             document.getElementById('anotacao-texto').value = '';
             document.getElementById('msg-salvo').classList.add('escondido');
+            
+            // Reseta o botão para o estado padrão
+            const btnSalvar = document.getElementById('btn-salvar-anotacao');
+            btnSalvar.innerHTML = '<i class="ph-bold ph-check"></i> Salvar Reflexão';
 
             document.getElementById('btn-proximo').style.opacity = offsetDias >= 0 ? '0.3' : '1';
             document.getElementById('btn-proximo').style.pointerEvents = offsetDias >= 0 ? 'none' : 'auto';
 
-            const res = await apiCall({ action: 'getDevocional', dataOffset: offsetDias });
+            // Passa o nome do usuário para checar a anotação existente
+            const res = await apiCall({ action: 'getDevocional', dataOffset: offsetDias, usuario: user });
             
             if(res.success) {
                 dataAlvoAtual = res.data;
                 document.getElementById('data-atual').innerText = res.data;
                 document.getElementById('ref-biblica').innerText = res.referencia;
                 document.getElementById('texto-biblico').innerText = res.texto;
+                
+                // Se já existir uma reflexão para esse usuário/dia, preenche o campo e ajusta o botão
+                if (res.anotacao) {
+                    document.getElementById('anotacao-texto').value = res.anotacao;
+                    btnSalvar.innerHTML = '<i class="ph-bold ph-pencil-simple"></i> Atualizar Reflexão';
+                }
             } else {
                 document.getElementById('data-atual').innerText = "Data sem registro";
                 document.getElementById('ref-biblica').innerText = "Nenhum texto";
@@ -343,19 +356,20 @@
             }
 
             const btn = event.currentTarget;
-            const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Salvando...';
             btn.disabled = true;
 
             const res = await apiCall({ action: 'salvarAnotacao', dataAlvo: dataAlvoAtual, usuario: user, anotacao: texto });
             
-            btn.innerHTML = originalText;
+            // Mantém o modo de edição ativo
+            btn.innerHTML = '<i class="ph-bold ph-pencil-simple"></i> Atualizar Reflexão';
             btn.disabled = false;
             
             if(res.success) {
                 const msg = document.getElementById('msg-salvo');
+                msg.innerHTML = `<i class="ph-fill ph-check-circle text-lg"></i> ${res.message}`;
                 msg.classList.remove('escondido');
-                document.getElementById('anotacao-texto').value = '';
+                // Não limpa mais o texto, apenas esconde a notificação de sucesso após 4s
                 setTimeout(() => msg.classList.add('escondido'), 4000);
             }
         }
@@ -380,7 +394,6 @@
         function atualizarLegendaUsuarios(historico) {
             const currentUser = localStorage.getItem("devocional_user");
             let outrosUsuarios = [...new Set(historico.map(h => h.usuario))].filter(u => u.toLowerCase() !== currentUser.toLowerCase());
-            // Aqui alteramos o nome dinâmico para Thaís quando não encontra no histórico
             let secondUser = outrosUsuarios.length > 0 ? outrosUsuarios[0] : "Thaís";
 
             document.getElementById('legenda-nome-1').innerText = currentUser;
@@ -409,19 +422,16 @@
             const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
             const currentUser = localStorage.getItem("devocional_user");
 
-            // Organizar histórico por data "dd/MM/yyyy"
             let mapaHistorico = {};
             cacheHistoricoData.historico.forEach(item => {
                 if(!mapaHistorico[item.dataAlvo]) mapaHistorico[item.dataAlvo] = [];
                 mapaHistorico[item.dataAlvo].push(item);
             });
 
-            // Espaços vazios do início do mês
             for(let i = 0; i < primeiroDiaSemana; i++) {
                 grid.innerHTML += `<div></div>`;
             }
 
-            // Preencher dias do mês
             for(let dia = 1; dia <= ultimoDiaMes; dia++) {
                 let diaStr = String(dia).padStart(2, '0');
                 let mesStr = String(mes + 1).padStart(2, '0');
