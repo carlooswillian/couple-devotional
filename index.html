@@ -359,13 +359,13 @@
             }
         }
 
-        // --- NOVA FUNÇÃO DE GERAÇÃO MANUAL VIA BOTÃO ---
+                // --- NOVA FUNÇÃO DE GERAÇÃO MANUAL VIA BOTÃO ---
         async function gerarDevocionalManualmente() {
             const user = localStorage.getItem("devocional_user");
             const btn = document.getElementById('btn-gerar-manual');
             
             if (btn) {
-                btn.innerHTML = '<i class="ph ph-spinner animate-spin text-lg"></i> Gerando... (Pode demorar)';
+                btn.innerHTML = '<i class="ph ph-spinner animate-spin text-lg"></i> Gerando... (Pode demorar uns 10s)';
                 btn.disabled = true;
                 btn.classList.add('opacity-70', 'cursor-not-allowed');
             }
@@ -380,7 +380,7 @@
 
                 document.getElementById('data-atual').innerText = res.data;
                 document.getElementById('ref-biblica').innerText = res.referencia;
-                document.getElementById('texto-biblico').innerText = res.texto; // Limpa o botão e coloca o texto
+                document.getElementById('texto-biblico').innerText = res.texto; 
                 
                 document.getElementById('anotacao-texto').value = '';
                 const btnSalvar = document.getElementById('btn-salvar-anotacao');
@@ -388,18 +388,24 @@
             } else {
                 let errorMsg = res.error || res.message || "Erro desconhecido ao gerar o devocional.";
                 
+                // NOVO: Renderiza os detalhes técnicos se existirem
+                let detalhesTech = res.detalhes ? `<div class="mt-4 p-3 bg-white/50 border border-rose-200 rounded-lg text-left text-[10px] text-rose-800 font-mono overflow-auto max-h-32 break-all shadow-inner"><strong>Detalhes:</strong><br>${res.detalhes}</div>` : '';
+                
                 // Exibe a tela de erro e deixa o usuário tentar novamente
                 document.getElementById('texto-biblico').innerHTML = `
                     <div class="flex flex-col items-center justify-center py-4 text-center p-4 bg-rose-50 rounded-2xl border border-rose-100">
-                        <i class="ph-fill ph-x-circle text-4xl text-rose-500 mb-3"></i>
-                        <p class="text-rose-700 mb-5 text-sm font-medium leading-relaxed">${errorMsg}</p>
-                        <button onclick="gerarDevocionalManualmente()" id="btn-gerar-manual" class="bg-teal-600 text-white px-5 py-3 rounded-2xl text-sm font-semibold hover:bg-teal-700 active:scale-95 transition-all shadow-md shadow-teal-200 flex items-center justify-center gap-2 w-full font-sans">
+                        <i class="ph-fill ph-warning-circle text-4xl text-rose-500 mb-2"></i>
+                        <h3 class="text-rose-800 font-bold mb-1 text-sm">Falha na Geração</h3>
+                        <p class="text-rose-600 mb-2 text-xs font-medium leading-relaxed">${errorMsg}</p>
+                        ${detalhesTech}
+                        <button onclick="gerarDevocionalManualmente()" id="btn-gerar-manual" class="mt-4 bg-teal-600 text-white px-5 py-3 rounded-xl text-sm font-semibold hover:bg-teal-700 active:scale-95 transition-all shadow-md flex items-center justify-center gap-2 w-full font-sans">
                             <i class="ph-bold ph-arrows-clockwise text-lg"></i> Tentar Novamente
                         </button>
                     </div>
                 `;
             }
         }
+
 
         function navegarData(direcao) {
             offsetDias += direcao;
