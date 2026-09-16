@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Devocional em Casal</title>
     
-    <!-- Tailwind CSS (Com atributo defer para não bloquear a renderização) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com" defer></script>
-    <!-- Ícones Modernos (Phosphor) com defer -->
+    <!-- Ícones Modernos (Phosphor) -->
     <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
@@ -113,6 +113,7 @@
 
             <!-- ABA: HISTÓRICO (CALENDÁRIO) -->
             <div id="aba-historico" class="escondido pb-6">
+                <!-- Conteúdo original do histórico mantido... -->
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                         <i class="ph-fill ph-calendar-check text-teal-600"></i> Calendário
@@ -122,9 +123,7 @@
                     </button>
                 </div>
 
-                <!-- Card Principal do Calendário -->
                 <div class="bg-white p-4 rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100">
-                    <!-- Navegação de Meses -->
                     <div class="flex justify-between items-center mb-4 px-2">
                         <button onclick="mudarMes(-1)" class="h-8 w-8 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-teal-50 hover:text-teal-600">
                             <i class="ph ph-caret-left font-bold"></i>
@@ -135,18 +134,13 @@
                         </button>
                     </div>
 
-                    <!-- Dias da Semana -->
                     <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-slate-400 mb-2">
                         <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
                     </div>
 
-                    <!-- Grid dos Dias do Mês -->
-                    <div id="calendario-grid" class="grid grid-cols-7 gap-1">
-                        <!-- Preenchido via JS -->
-                    </div>
+                    <div id="calendario-grid" class="grid grid-cols-7 gap-1"></div>
                 </div>
 
-                <!-- Legenda de Ícones -->
                 <div class="flex justify-center items-center gap-6 mt-4 text-xs text-slate-500 font-medium bg-white py-3 px-4 rounded-2xl border border-slate-100">
                     <div class="flex items-center gap-2">
                         <div id="legenda-avatar-1" class="w-6 h-6 rounded-full bg-teal-600 text-white flex items-center justify-center text-[10px] font-bold">U</div>
@@ -176,8 +170,9 @@
         </nav>
     </div>
 
-    <!-- MODAL DE DETALHES DO DIA -->
+    <!-- MODAL DE DETALHES -->
     <div id="modal-dia" class="escondido fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <!-- Estrutura do Modal Mantida -->
         <div class="bg-white w-full max-w-md max-h-[85vh] rounded-t-[2.5rem] sm:rounded-3xl p-6 shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom duration-200">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 shrink-0">
                 <div>
@@ -188,20 +183,14 @@
                     <i class="ph ph-x font-bold"></i>
                 </button>
             </div>
-
             <div class="overflow-y-auto flex-1 space-y-4 pr-1">
-                <!-- Texto Bíblico do Dia -->
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                     <p class="text-xs font-semibold text-slate-400 uppercase mb-1">Leitura Bíblica</p>
                     <div id="modal-texto-biblico" class="fonte-biblia text-slate-700 text-sm leading-relaxed whitespace-pre-line font-light"></div>
                 </div>
-
-                <!-- Comentários do Casal -->
                 <div>
                     <p class="text-xs font-semibold text-slate-400 uppercase mb-2">Reflexões do Casal</p>
-                    <div id="modal-comentarios" class="space-y-3">
-                        <!-- Comentários inseridos via JS -->
-                    </div>
+                    <div id="modal-comentarios" class="space-y-3"></div>
                 </div>
             </div>
         </div>
@@ -209,6 +198,7 @@
 
     <!-- JAVASCRIPT -->
     <script>
+        // ATENÇÃO: COLOQUE AQUI A SUA URL DA API DE NOVO
         const API_URL = "https://script.google.com/macros/s/AKfycbyRRq99q9ldKX9XI5irg0LKaFShHEbY39unKOSw__yoHyUGWYaO05VJG7B82ICPiCs/exec"; 
         
         let offsetDias = 0;
@@ -309,12 +299,11 @@
             const cacheLocal = localStorage.getItem(cacheKey);
             const btnSalvar = document.getElementById('btn-salvar-anotacao');
             
-            // 1. Tenta carregar os dados instantaneamente via cache
             if (cacheLocal) {
                 const dados = JSON.parse(cacheLocal);
                 document.getElementById('data-atual').innerText = dados.data;
                 document.getElementById('ref-biblica').innerText = dados.referencia;
-                document.getElementById('texto-biblico').innerText = dados.texto;
+                document.getElementById('texto-biblico').innerText = dados.texto; // Usamos innerText para o texto normal
                 
                 if (dados.anotacao) {
                     document.getElementById('anotacao-texto').value = dados.anotacao;
@@ -324,7 +313,6 @@
                     btnSalvar.innerHTML = '<i class="ph-bold ph-check"></i> Salvar Reflexão';
                 }
             } else {
-                // Se não há cache, exibe o esqueleto (animação pulse)
                 document.getElementById('ref-biblica').innerHTML = '<div class="h-4 bg-slate-200 rounded w-24 animate-pulse"></div>';
                 document.getElementById('texto-biblico').innerHTML = '<div class="space-y-2"><div class="h-4 bg-slate-200 rounded w-full animate-pulse"></div><div class="h-4 bg-slate-200 rounded w-5/6 animate-pulse"></div></div>';
                 document.getElementById('data-atual').innerText = "...";
@@ -336,17 +324,15 @@
             document.getElementById('btn-proximo').style.opacity = offsetDias >= 0 ? '0.3' : '1';
             document.getElementById('btn-proximo').style.pointerEvents = offsetDias >= 0 ? 'none' : 'auto';
 
-            // 2. Busca dados atualizados no servidor silenciosamente
             const res = await apiCall({ action: 'getDevocional', dataOffset: offsetDias, usuario: user });
             
             if(res.success) {
                 dataAlvoAtual = res.data;
-                // Atualiza o cache
                 localStorage.setItem(cacheKey, JSON.stringify(res));
 
                 document.getElementById('data-atual').innerText = res.data;
                 document.getElementById('ref-biblica').innerText = res.referencia;
-                document.getElementById('texto-biblico').innerText = res.texto;
+                document.getElementById('texto-biblico').innerText = res.texto; // Reseta innerText normal
                 
                 if (res.anotacao) {
                     document.getElementById('anotacao-texto').value = res.anotacao;
@@ -356,8 +342,62 @@
                 if (!cacheLocal) {
                     document.getElementById('data-atual').innerText = "Data sem registro";
                     document.getElementById('ref-biblica').innerText = "Nenhum texto";
-                    document.getElementById('texto-biblico').innerText = "Não há devocional gerado para este dia no passado.";
+                    
+                    let errorMsg = res.error || res.message || "Não há devocional gerado para este dia.";
+                    
+                    // Substitui o texto pelo HTML com o Botão
+                    document.getElementById('texto-biblico').innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-4 text-center">
+                            <i class="ph-fill ph-warning-circle text-4xl text-amber-500 mb-3"></i>
+                            <p class="text-slate-600 mb-6 text-sm font-medium leading-relaxed">${errorMsg}</p>
+                            <button onclick="gerarDevocionalManualmente()" id="btn-gerar-manual" class="bg-teal-600 text-white px-5 py-3 rounded-2xl text-sm font-semibold hover:bg-teal-700 active:scale-95 transition-all shadow-md shadow-teal-200 flex items-center justify-center gap-2 w-full font-sans">
+                                <i class="ph-bold ph-magic-wand text-lg"></i> Gerar Devocional Agora
+                            </button>
+                        </div>
+                    `;
                 }
+            }
+        }
+
+        // --- NOVA FUNÇÃO DE GERAÇÃO MANUAL VIA BOTÃO ---
+        async function gerarDevocionalManualmente() {
+            const user = localStorage.getItem("devocional_user");
+            const btn = document.getElementById('btn-gerar-manual');
+            
+            if (btn) {
+                btn.innerHTML = '<i class="ph ph-spinner animate-spin text-lg"></i> Gerando... (Pode demorar)';
+                btn.disabled = true;
+                btn.classList.add('opacity-70', 'cursor-not-allowed');
+            }
+
+            // Envia a ação que ignora o bloqueio de dias passados
+            const res = await apiCall({ action: 'forcarGeracao', dataOffset: offsetDias, usuario: user });
+            
+            if (res.success) {
+                dataAlvoAtual = res.data;
+                const cacheKey = `cache_devocional_${offsetDias}`;
+                localStorage.setItem(cacheKey, JSON.stringify(res));
+
+                document.getElementById('data-atual').innerText = res.data;
+                document.getElementById('ref-biblica').innerText = res.referencia;
+                document.getElementById('texto-biblico').innerText = res.texto; // Limpa o botão e coloca o texto
+                
+                document.getElementById('anotacao-texto').value = '';
+                const btnSalvar = document.getElementById('btn-salvar-anotacao');
+                btnSalvar.innerHTML = '<i class="ph-bold ph-check"></i> Salvar Reflexão';
+            } else {
+                let errorMsg = res.error || res.message || "Erro desconhecido ao gerar o devocional.";
+                
+                // Exibe a tela de erro e deixa o usuário tentar novamente
+                document.getElementById('texto-biblico').innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-4 text-center p-4 bg-rose-50 rounded-2xl border border-rose-100">
+                        <i class="ph-fill ph-x-circle text-4xl text-rose-500 mb-3"></i>
+                        <p class="text-rose-700 mb-5 text-sm font-medium leading-relaxed">${errorMsg}</p>
+                        <button onclick="gerarDevocionalManualmente()" id="btn-gerar-manual" class="bg-teal-600 text-white px-5 py-3 rounded-2xl text-sm font-semibold hover:bg-teal-700 active:scale-95 transition-all shadow-md shadow-teal-200 flex items-center justify-center gap-2 w-full font-sans">
+                            <i class="ph-bold ph-arrows-clockwise text-lg"></i> Tentar Novamente
+                        </button>
+                    </div>
+                `;
             }
         }
 
