@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- Meta tags para comportamento de App Nativo (PWA) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#f8fafc">
+    <meta name="mobile-web-app-capable" content="yes">
+    
     <title>Devocional em Casal</title>
     
     <!-- Tailwind CSS -->
@@ -12,6 +19,16 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
     
+    <!-- SCRIPT ANTI-PISCAR TELA DE LOGIN -->
+    <script>
+        const savedUser = localStorage.getItem("devocional_user");
+        if(savedUser) {
+            document.documentElement.classList.add('is-logged');
+        } else {
+            document.documentElement.classList.add('not-logged');
+        }
+    </script>
+    
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
@@ -20,6 +37,13 @@
         }
         .fonte-biblia { font-family: 'Merriweather', serif; }
         .escondido { display: none !important; }
+        
+        /* Lógica CSS para evitar o piscar da tela */
+        html.is-logged #login-screen { display: none !important; }
+        html.is-logged #app-screen { display: flex !important; }
+        html.not-logged #login-screen { display: flex !important; }
+        html.not-logged #app-screen { display: none !important; }
+        
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
         .padding-safe-bottom { padding-bottom: env(safe-area-inset-bottom, 12px); }
@@ -28,7 +52,7 @@
 <body class="bg-slate-50 text-slate-800 h-[100dvh] w-full flex flex-col overflow-hidden m-0 p-0">
 
     <!-- TELA DE LOGIN -->
-    <div id="login-screen" class="flex flex-col items-center justify-center h-full px-6 bg-gradient-to-br from-teal-50 to-slate-100">
+    <div id="login-screen" class="flex-col items-center justify-center h-full px-6 bg-gradient-to-br from-teal-50 to-slate-100">
         <div class="bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-md text-center border border-slate-100">
             <i class="ph ph-hands-praying text-5xl text-teal-600 mb-4 inline-block"></i>
             <h1 class="text-2xl font-bold text-slate-800 mb-2">Nosso Devocional</h1>
@@ -57,7 +81,7 @@
     </div>
 
     <!-- APP PRINCIPAL -->
-    <div id="app-screen" class="escondido flex-col h-full w-full max-w-md mx-auto bg-slate-50 shadow-2xl relative overflow-hidden">
+    <div id="app-screen" class="flex-col h-full w-full max-w-md mx-auto bg-slate-50 shadow-2xl relative overflow-hidden">
         
         <!-- HEADER -->
         <header class="py-4 px-6 flex justify-between items-center bg-slate-50 shrink-0 border-b border-slate-100 shadow-sm z-10">
@@ -80,7 +104,7 @@
                         <i class="ph ph-caret-left font-bold"></i>
                     </button>
                     <span id="data-atual" class="font-semibold text-sm text-slate-700">Carregando...</span>
-                    <button onclick="navegarData(1)" id="btn-proximo" class="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-teal-50 hover:text-teal-600 transition-colors">
+                    <button onclick="navegarData(1)" id="btn-proximo" class="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-teal-50 hover:text-teal-600 transition-colors opacity-30 pointer-events-none">
                         <i class="ph ph-caret-right font-bold"></i>
                     </button>
                 </div>
@@ -113,12 +137,11 @@
 
             <!-- ABA: HISTÓRICO (CALENDÁRIO) -->
             <div id="aba-historico" class="escondido pb-6">
-                <!-- Conteúdo original do histórico mantido... -->
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                         <i class="ph-fill ph-calendar-check text-teal-600"></i> Calendário
                     </h2>
-                    <button onclick="carregarHistorico()" class="text-teal-600 hover:bg-teal-50 p-2 rounded-full transition-colors" title="Atualizar">
+                    <button onclick="carregarHistorico(true)" class="text-teal-600 hover:bg-teal-50 p-2 rounded-full transition-colors" title="Atualizar">
                         <i class="ph-bold ph-arrows-clockwise text-xl"></i>
                     </button>
                 </div>
@@ -172,7 +195,6 @@
 
     <!-- MODAL DE DETALHES -->
     <div id="modal-dia" class="escondido fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <!-- Estrutura do Modal Mantida -->
         <div class="bg-white w-full max-w-md max-h-[85vh] rounded-t-[2.5rem] sm:rounded-3xl p-6 shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom duration-200">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 shrink-0">
                 <div>
@@ -205,12 +227,13 @@
         let dataAlvoAtual = "";
         let cacheHistoricoData = { historico: [], devocionais: {} };
         let dataCalendarioAtual = new Date();
+        let historicoCarregado = false;
 
         window.onload = () => {
             const user = localStorage.getItem("devocional_user");
             if(user) {
                 document.getElementById('user-display').innerText = user;
-                mostrarApp();
+                carregarDevocional();
             }
         };
 
@@ -242,7 +265,12 @@
             if(res.success) {
                 localStorage.setItem("devocional_user", res.usuario);
                 document.getElementById('user-display').innerText = res.usuario;
-                mostrarApp();
+                
+                // Transição suave
+                document.documentElement.classList.remove('not-logged');
+                document.documentElement.classList.add('is-logged');
+                
+                carregarDevocional();
             } else {
                 errorMsg.innerText = res.message;
                 errorMsg.classList.remove('escondido');
@@ -252,18 +280,12 @@
 
         function sair() {
             localStorage.removeItem("devocional_user");
-            document.getElementById('app-screen').classList.add('escondido');
-            document.getElementById('login-screen').classList.remove('escondido');
+            document.documentElement.classList.remove('is-logged');
+            document.documentElement.classList.add('not-logged');
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
             offsetDias = 0;
-        }
-
-        function mostrarApp() {
-            document.getElementById('login-screen').classList.add('escondido');
-            document.getElementById('app-screen').classList.remove('escondido');
-            document.getElementById('app-screen').classList.add('flex');
-            carregarDevocional();
+            historicoCarregado = false;
         }
 
         function mudarAba(aba) {
@@ -289,77 +311,82 @@
             } else {
                 navHist.className = "flex flex-col items-center p-2 w-20 text-teal-600 font-semibold transition-colors";
                 iconHist.className = "ph-fill ph-calendar-check text-2xl mb-1";
-                carregarHistorico();
+                if(!historicoCarregado) carregarHistorico();
+            }
+        }
+
+        // Função auxiliar para calcular data atual e formatar como DD/MM/YYYY
+        function obterDataFormatadaPorOffset(offset) {
+            const d = new Date();
+            d.setDate(d.getDate() + offset);
+            const dia = String(d.getDate()).padStart(2, '0');
+            const mes = String(d.getMonth() + 1).padStart(2, '0');
+            const ano = d.getFullYear();
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        function renderizarUI(dados) {
+            const btnSalvar = document.getElementById('btn-salvar-anotacao');
+            document.getElementById('data-atual').innerText = dados.data || dados.dataAlvoAtual;
+            document.getElementById('ref-biblica').innerText = dados.referencia;
+            document.getElementById('texto-biblico').innerText = dados.texto;
+            
+            if (dados.anotacao) {
+                document.getElementById('anotacao-texto').value = dados.anotacao;
+                btnSalvar.innerHTML = '<i class="ph-bold ph-pencil-simple"></i> Atualizar Reflexão';
+            } else {
+                document.getElementById('anotacao-texto').value = '';
+                btnSalvar.innerHTML = '<i class="ph-bold ph-check"></i> Salvar Reflexão';
             }
         }
 
         async function carregarDevocional() {
             const user = localStorage.getItem("devocional_user"); 
-            const cacheKey = `cache_devocional_${offsetDias}`;
+            const dataEsperada = obterDataFormatadaPorOffset(offsetDias);
+            const cacheKey = `devocional_${dataEsperada}`;
             const cacheLocal = localStorage.getItem(cacheKey);
-            const btnSalvar = document.getElementById('btn-salvar-anotacao');
             
-            if (cacheLocal) {
-                const dados = JSON.parse(cacheLocal);
-                document.getElementById('data-atual').innerText = dados.data;
-                document.getElementById('ref-biblica').innerText = dados.referencia;
-                document.getElementById('texto-biblico').innerText = dados.texto; // Usamos innerText para o texto normal
-                
-                if (dados.anotacao) {
-                    document.getElementById('anotacao-texto').value = dados.anotacao;
-                    btnSalvar.innerHTML = '<i class="ph-bold ph-pencil-simple"></i> Atualizar Reflexão';
-                } else {
-                    document.getElementById('anotacao-texto').value = '';
-                    btnSalvar.innerHTML = '<i class="ph-bold ph-check"></i> Salvar Reflexão';
-                }
-            } else {
-                document.getElementById('ref-biblica').innerHTML = '<div class="h-4 bg-slate-200 rounded w-24 animate-pulse"></div>';
-                document.getElementById('texto-biblico').innerHTML = '<div class="space-y-2"><div class="h-4 bg-slate-200 rounded w-full animate-pulse"></div><div class="h-4 bg-slate-200 rounded w-5/6 animate-pulse"></div></div>';
-                document.getElementById('data-atual').innerText = "...";
-                document.getElementById('anotacao-texto').value = '';
-                btnSalvar.innerHTML = '<i class="ph-bold ph-check"></i> Salvar Reflexão';
-            }
-
-            document.getElementById('msg-salvo').classList.add('escondido');
+            // Controle dos botões do calendário
             document.getElementById('btn-proximo').style.opacity = offsetDias >= 0 ? '0.3' : '1';
             document.getElementById('btn-proximo').style.pointerEvents = offsetDias >= 0 ? 'none' : 'auto';
+            document.getElementById('msg-salvo').classList.add('escondido');
+
+            // 1. SE TEM CACHE, RENDERIZA E CANCELA API (Deixa o app super fluido)
+            if (cacheLocal) {
+                const dados = JSON.parse(cacheLocal);
+                dataAlvoAtual = dados.data;
+                renderizarUI(dados);
+                return; // INTERROMPE AQUI. NÃO CHAMA A API DESNECESSARIAMENTE.
+            } 
+
+            // Se não tem cache, mostra skeleton e chama API
+            document.getElementById('ref-biblica').innerHTML = '<div class="h-4 bg-slate-200 rounded w-24 animate-pulse"></div>';
+            document.getElementById('texto-biblico').innerHTML = '<div class="space-y-2"><div class="h-4 bg-slate-200 rounded w-full animate-pulse"></div><div class="h-4 bg-slate-200 rounded w-5/6 animate-pulse"></div></div>';
+            document.getElementById('data-atual').innerText = dataEsperada;
+            document.getElementById('anotacao-texto').value = '';
 
             const res = await apiCall({ action: 'getDevocional', dataOffset: offsetDias, usuario: user });
             
             if(res.success) {
                 dataAlvoAtual = res.data;
-                localStorage.setItem(cacheKey, JSON.stringify(res));
-
-                document.getElementById('data-atual').innerText = res.data;
-                document.getElementById('ref-biblica').innerText = res.referencia;
-                document.getElementById('texto-biblico').innerText = res.texto; // Reseta innerText normal
-                
-                if (res.anotacao) {
-                    document.getElementById('anotacao-texto').value = res.anotacao;
-                    btnSalvar.innerHTML = '<i class="ph-bold ph-pencil-simple"></i> Atualizar Reflexão';
-                }
+                localStorage.setItem(cacheKey, JSON.stringify(res)); // Salva no cache
+                renderizarUI(res);
             } else {
-                if (!cacheLocal) {
-                    document.getElementById('data-atual').innerText = "Data sem registro";
-                    document.getElementById('ref-biblica').innerText = "Nenhum texto";
-                    
-                    let errorMsg = res.error || res.message || "Não há devocional gerado para este dia.";
-                    
-                    // Substitui o texto pelo HTML com o Botão
-                    document.getElementById('texto-biblico').innerHTML = `
-                        <div class="flex flex-col items-center justify-center py-4 text-center">
-                            <i class="ph-fill ph-warning-circle text-4xl text-amber-500 mb-3"></i>
-                            <p class="text-slate-600 mb-6 text-sm font-medium leading-relaxed">${errorMsg}</p>
-                            <button onclick="gerarDevocionalManualmente()" id="btn-gerar-manual" class="bg-teal-600 text-white px-5 py-3 rounded-2xl text-sm font-semibold hover:bg-teal-700 active:scale-95 transition-all shadow-md shadow-teal-200 flex items-center justify-center gap-2 w-full font-sans">
-                                <i class="ph-bold ph-magic-wand text-lg"></i> Gerar Devocional Agora
-                            </button>
-                        </div>
-                    `;
-                }
+                document.getElementById('ref-biblica').innerText = "Nenhum texto";
+                let errorMsg = res.error || res.message || "Não há devocional gerado para este dia.";
+                
+                document.getElementById('texto-biblico').innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-4 text-center">
+                        <i class="ph-fill ph-warning-circle text-4xl text-amber-500 mb-3"></i>
+                        <p class="text-slate-600 mb-6 text-sm font-medium leading-relaxed">${errorMsg}</p>
+                        <button onclick="gerarDevocionalManualmente()" id="btn-gerar-manual" class="bg-teal-600 text-white px-5 py-3 rounded-2xl text-sm font-semibold hover:bg-teal-700 active:scale-95 transition-all shadow-md shadow-teal-200 flex items-center justify-center gap-2 w-full font-sans">
+                            <i class="ph-bold ph-magic-wand text-lg"></i> Gerar Devocional Agora
+                        </button>
+                    </div>
+                `;
             }
         }
 
-                // --- NOVA FUNÇÃO DE GERAÇÃO MANUAL VIA BOTÃO ---
         async function gerarDevocionalManualmente() {
             const user = localStorage.getItem("devocional_user");
             const btn = document.getElementById('btn-gerar-manual');
@@ -370,28 +397,17 @@
                 btn.classList.add('opacity-70', 'cursor-not-allowed');
             }
 
-            // Envia a ação que ignora o bloqueio de dias passados
             const res = await apiCall({ action: 'forcarGeracao', dataOffset: offsetDias, usuario: user });
             
             if (res.success) {
                 dataAlvoAtual = res.data;
-                const cacheKey = `cache_devocional_${offsetDias}`;
-                localStorage.setItem(cacheKey, JSON.stringify(res));
-
-                document.getElementById('data-atual').innerText = res.data;
-                document.getElementById('ref-biblica').innerText = res.referencia;
-                document.getElementById('texto-biblico').innerText = res.texto; 
-                
-                document.getElementById('anotacao-texto').value = '';
-                const btnSalvar = document.getElementById('btn-salvar-anotacao');
-                btnSalvar.innerHTML = '<i class="ph-bold ph-check"></i> Salvar Reflexão';
+                const cacheKey = `devocional_${dataAlvoAtual}`;
+                localStorage.setItem(cacheKey, JSON.stringify(res)); // Atualiza cache com a nova geração
+                renderizarUI(res);
             } else {
                 let errorMsg = res.error || res.message || "Erro desconhecido ao gerar o devocional.";
-                
-                // NOVO: Renderiza os detalhes técnicos se existirem
                 let detalhesTech = res.detalhes ? `<div class="mt-4 p-3 bg-white/50 border border-rose-200 rounded-lg text-left text-[10px] text-rose-800 font-mono overflow-auto max-h-32 break-all shadow-inner"><strong>Detalhes:</strong><br>${res.detalhes}</div>` : '';
                 
-                // Exibe a tela de erro e deixa o usuário tentar novamente
                 document.getElementById('texto-biblico').innerHTML = `
                     <div class="flex flex-col items-center justify-center py-4 text-center p-4 bg-rose-50 rounded-2xl border border-rose-100">
                         <i class="ph-fill ph-warning-circle text-4xl text-rose-500 mb-2"></i>
@@ -405,7 +421,6 @@
                 `;
             }
         }
-
 
         function navegarData(direcao) {
             offsetDias += direcao;
@@ -432,14 +447,28 @@
             btn.disabled = false;
             
             if(res.success) {
+                // ATUALIZA O CACHE PARA NÃO PERDER A ANOTAÇÃO SE O USUÁRIO RECARREGAR A PÁGINA
+                const cacheKey = `devocional_${dataAlvoAtual}`;
+                const cacheLocal = localStorage.getItem(cacheKey);
+                if(cacheLocal) {
+                    let dados = JSON.parse(cacheLocal);
+                    dados.anotacao = texto;
+                    localStorage.setItem(cacheKey, JSON.stringify(dados));
+                }
+
                 const msg = document.getElementById('msg-salvo');
                 msg.innerHTML = `<i class="ph-fill ph-check-circle text-lg"></i> ${res.message}`;
                 msg.classList.remove('escondido');
                 setTimeout(() => msg.classList.add('escondido'), 4000);
+                
+                // Força o histórico a recarregar na próxima vez que a aba for aberta
+                historicoCarregado = false; 
             }
         }
 
-        async function carregarHistorico() {
+        async function carregarHistorico(forcarUpdate = false) {
+            if (historicoCarregado && !forcarUpdate) return;
+            
             const grid = document.getElementById('calendario-grid');
             grid.innerHTML = `
                 <div class="col-span-7 flex flex-col items-center justify-center py-12 text-slate-400">
@@ -451,6 +480,7 @@
             
             if(res.success) {
                 cacheHistoricoData = res;
+                historicoCarregado = true;
                 atualizarLegendaUsuarios(res.historico);
                 montarCalendario();
             }
