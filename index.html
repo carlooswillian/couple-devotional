@@ -392,7 +392,8 @@
             const btn = document.getElementById('btn-gerar-manual');
             
             if (btn) {
-                btn.innerHTML = '<i class="ph ph-spinner animate-spin text-lg"></i> Gerando... (Pode demorar uns 10s)';
+                // Mensagem alterada para indicar que o script faz auto-tentativas
+                btn.innerHTML = '<i class="ph ph-spinner animate-spin text-lg"></i> Gerando... (Pode demorar até 30s)';
                 btn.disabled = true;
                 btn.classList.add('opacity-70', 'cursor-not-allowed');
             }
