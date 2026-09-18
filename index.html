@@ -9,11 +9,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#f8fafc">
     <meta name="mobile-web-app-capable" content="yes">
-        <!-- Conexão PWA -->
+    
+    <!-- Conexão PWA -->
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
 
-    
     <title>Devocional em Casal</title>
     
     <!-- Tailwind CSS -->
@@ -223,7 +223,6 @@
     </div>
 
     <script>
-            // ATENÇÃO: COLOQUE AQUI A SUA URL DA API DE NOVO
         const API_URL = "https://script.google.com/macros/s/AKfycbyRRq99q9ldKX9XI5irg0LKaFShHEbY39unKOSw__yoHyUGWYaO05VJG7B82ICPiCs/exec"; 
         
         let offsetDias = 0;
@@ -360,7 +359,6 @@
             document.getElementById('data-atual').innerText = dataEsperada;
             document.getElementById('anotacao-texto').value = '';
 
-            // Agora a API APENAS LÊ, NUNCA GERA automaticamente
             const res = await apiCall({ action: 'getDevocional', dataOffset: offsetDias, usuario: user });
             
             if(res.success) {
@@ -389,7 +387,6 @@
             const btn = document.getElementById('btn-gerar-manual');
             
             if (btn) {
-                // Aviso claro sobre o tempo de espera devido ao intervalo programado
                 btn.innerHTML = '<i class="ph ph-spinner animate-spin text-lg"></i> Gerando... (Pode levar até 4 minutos)';
                 btn.disabled = true;
                 btn.classList.add('opacity-70', 'cursor-not-allowed');
@@ -420,7 +417,6 @@
             }
         }
 
-        // --- AS OUTRAS FUNÇÕES (navegarData, salvarAnotacao, carregarHistorico, etc) SEGUEM INTACTAS ---
         function navegarData(direcao) { offsetDias += direcao; if(offsetDias > 0) offsetDias = 0; carregarDevocional(); }
 
         async function salvarAnotacao(event) {
@@ -564,13 +560,7 @@
             } catch (error) { return { success: false, message: "Erro de conexão. Verifique sua internet." }; }
         }
 
-    <script>        
-
-        
-             
-
-        <!-- REGISTRO DO PWA -->
-    <script>
+        // REGISTRO DO PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
@@ -581,5 +571,3 @@
     </script>
 </body>
 </html>
-
-
